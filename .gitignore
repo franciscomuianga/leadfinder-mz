@@ -1,0 +1,19 @@
+# Dependências
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Ambiente
+.env
+.env.local
+.env.production
+
+# Editor / SO
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+
+# Debug
+npm-debug.log*
