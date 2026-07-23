@@ -10,6 +10,9 @@ const STATUS_STYLES: Record<string, string> = {
   site_fraco: "bg-amber-500/15 text-amber-400",
   site_ok: "bg-emerald-500/15 text-emerald-400",
   nao_avaliado: "bg-neutral-500/15 text-neutral-400",
+  alta: "bg-emerald-500/15 text-emerald-400",
+  media: "bg-amber-500/15 text-amber-400",
+  baixa: "bg-neutral-500/15 text-neutral-400",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -22,6 +25,9 @@ const STATUS_LABELS: Record<string, string> = {
   site_fraco: "Site fraco",
   site_ok: "Site OK",
   nao_avaliado: "Não avaliado",
+  alta: "Prioridade alta",
+  media: "Prioridade média",
+  baixa: "Prioridade baixa",
 };
 
 export function Badge({ status }: { status: string }) {

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { searchLeadsAction, saveLeadAction, type SearchResultItem } from "@/app/leads/actions";
+import { calculatePriority } from "@/lib/priority-score";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -16,6 +17,7 @@ const CATEGORIES = [
   { value: "hotel", label: "Hotéis" },
   { value: "salao_beleza", label: "Salões de beleza" },
   { value: "oficina_auto", label: "Oficinas auto" },
+  { value: "mercearia", label: "Mercearias" },
 ];
 
 export function SearchForm() {
@@ -51,6 +53,16 @@ export function SearchForm() {
 
   const semSite = results?.filter((r) => !r.website) ?? [];
   const comSite = results?.filter((r) => r.website) ?? [];
+
+  const sortedResults = results
+    ? [...results].sort(
+        (a, b) =>
+          calculatePriority({ phone: b.phone, address: b.address, openingHours: b.openingHours })
+            .score -
+          calculatePriority({ phone: a.phone, address: a.address, openingHours: a.openingHours })
+            .score
+      )
+    : [];
 
   return (
     <div>
@@ -90,35 +102,43 @@ export function SearchForm() {
           </p>
 
           <div className="space-y-3">
-            {results.map((business) => (
-              <Card key={business.osmId} className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="font-medium text-white">{business.name}</p>
-                  <p className="text-xs text-neutral-500">
-                    {business.address ?? "Morada não disponível"} · {business.phone ?? "sem telefone"}
-                  </p>
-                  <div className="mt-1.5 flex items-center gap-2">
-                    <Badge status={business.website ? "nao_avaliado" : "sem_site"} />
-                    <a
-                      href={business.googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-brand-primary-light hover:underline"
-                    >
-                      Ver no Google Maps
-                    </a>
+            {sortedResults.map((business) => {
+              const priority = calculatePriority({
+                phone: business.phone,
+                address: business.address,
+                openingHours: business.openingHours,
+              });
+              return (
+                <Card key={business.osmId} className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-white">{business.name}</p>
+                    <p className="text-xs text-neutral-500">
+                      {business.address ?? "Morada não disponível"} · {business.phone ?? "sem telefone"}
+                    </p>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <Badge status={business.website ? "nao_avaliado" : "sem_site"} />
+                      <Badge status={priority.label} />
+                      <a
+                        href={business.googleMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-brand-primary-light hover:underline"
+                      >
+                        Ver no Google Maps
+                      </a>
+                    </div>
                   </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant={savedIds.has(business.osmId) ? "secondary" : "primary"}
-                  disabled={savedIds.has(business.osmId) || isPending}
-                  onClick={() => handleSave(business)}
-                >
-                  {savedIds.has(business.osmId) ? "Guardado ✓" : "Guardar como lead"}
-                </Button>
-              </Card>
-            ))}
+                  <Button
+                    size="sm"
+                    variant={savedIds.has(business.osmId) ? "secondary" : "primary"}
+                    disabled={savedIds.has(business.osmId) || isPending}
+                    onClick={() => handleSave(business)}
+                  >
+                    {savedIds.has(business.osmId) ? "Guardado ✓" : "Guardar como lead"}
+                  </Button>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}

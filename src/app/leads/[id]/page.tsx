@@ -34,6 +34,7 @@ export default async function LeadDetailPage({
           <h1 className="text-2xl font-bold text-white">{lead.name}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <Badge status={lead.site_health} />
+            <Badge status={lead.priority_label ?? "baixa"} />
             <Badge status={lead.status} />
           </div>
         </div>
@@ -69,6 +70,10 @@ export default async function LeadDetailPage({
               <div>
                 <dt className="text-xs text-neutral-500">Telefone</dt>
                 <dd className="text-neutral-200">{lead.phone ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-neutral-500">Horário de funcionamento</dt>
+                <dd className="text-neutral-200">{lead.opening_hours ?? "—"}</dd>
               </div>
               <div>
                 <dt className="text-xs text-neutral-500">Site existente</dt>

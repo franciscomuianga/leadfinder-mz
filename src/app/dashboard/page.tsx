@@ -10,6 +10,7 @@ export default async function DashboardPage() {
     .from("leads")
     .select("*")
     .eq("organization_id", organizationId)
+    .order("priority_score", { ascending: false })
     .order("created_at", { ascending: false });
 
   const total = leads?.length ?? 0;
@@ -69,6 +70,7 @@ export default async function DashboardPage() {
                 <th className="px-4 py-3">Nome</th>
                 <th className="px-4 py-3">Categoria</th>
                 <th className="px-4 py-3">Site</th>
+                <th className="px-4 py-3">Prioridade</th>
                 <th className="px-4 py-3">Estado</th>
               </tr>
             </thead>
@@ -84,6 +86,9 @@ export default async function DashboardPage() {
                   <td className="px-4 py-3 text-neutral-400">{lead.category}</td>
                   <td className="px-4 py-3">
                     <Badge status={lead.site_health} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge status={lead.priority_label ?? "baixa"} />
                   </td>
                   <td className="px-4 py-3">
                     <Badge status={lead.status} />

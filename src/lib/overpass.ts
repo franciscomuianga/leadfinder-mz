@@ -22,6 +22,7 @@ export const CATEGORY_TAGS: Record<string, string> = {
   hotel: "tourism=hotel",
   salao_beleza: "shop=hairdresser",
   oficina_auto: "shop=car_repair",
+  mercearia: "shop=convenience",
 };
 
 export interface OsmBusiness {
@@ -33,6 +34,7 @@ export interface OsmBusiness {
   city: string | null;
   phone: string | null;
   website: string | null;
+  openingHours: string | null;
   latitude: number;
   longitude: number;
 }
@@ -118,6 +120,7 @@ export async function searchBusinesses(
         city: tags["addr:city"] ?? areaName,
         phone: tags.phone ?? tags["contact:phone"] ?? null,
         website: tags.website ?? tags["contact:website"] ?? null,
+        openingHours: tags.opening_hours ?? null,
         latitude: lat,
         longitude: lon,
       };
@@ -131,7 +134,7 @@ async function resolveAreaId(areaName: string): Promise<number> {
   )}&format=json&limit=1&countrycodes=mz`;
 
   const response = await fetch(url, {
-    headers: { "User-Agent": "LeadFinderMZ/1.0" },
+    headers: { "User-Agent": "LeadFinderMZ/1.0" }, // exigido pela política do Nominatim
   });
 
   if (!response.ok) throw new Error("Não foi possível localizar essa área.");
@@ -139,6 +142,7 @@ async function resolveAreaId(areaName: string): Promise<number> {
   const results: { osm_id: number; osm_type: string }[] = await response.json();
   if (results.length === 0) throw new Error(`Área "${areaName}" não encontrada.`);
 
+  // Overpass usa um offset: 3600000000 para relations, 2400000000 para ways
   const offset = results[0].osm_type === "relation" ? 3600000000 : 2400000000;
   return results[0].osm_id + offset;
 }

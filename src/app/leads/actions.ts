@@ -3,6 +3,7 @@
 import { requireOrganization } from "@/lib/auth";
 import { searchBusinesses, googleMapsUrl, type OsmBusiness } from "@/lib/overpass";
 import { checkSiteHealth } from "@/lib/site-health-check";
+import { calculatePriority } from "@/lib/priority-score";
 import { revalidatePath } from "next/cache";
 
 export interface SearchResultItem extends OsmBusiness {
@@ -13,7 +14,7 @@ export async function searchLeadsAction(
   categoryKey: string,
   areaName: string
 ): Promise<{ results: SearchResultItem[] } | { error: string }> {
-  await requireOrganization();
+  await requireOrganization(); // garante autenticação antes de gastar pedidos externos
 
   try {
     const businesses = await searchBusinesses(categoryKey, areaName);
@@ -31,6 +32,11 @@ export async function saveLeadAction(business: SearchResultItem) {
   const { organizationId, supabase } = await requireOrganization();
 
   const healthResult = await checkSiteHealth(business.website);
+  const priority = calculatePriority({
+    phone: business.phone,
+    address: business.address,
+    openingHours: business.openingHours,
+  });
 
   const { data, error } = await supabase
     .from("leads")
@@ -44,11 +50,14 @@ export async function saveLeadAction(business: SearchResultItem) {
       city: business.city,
       phone: business.phone,
       existing_website: business.website,
+      opening_hours: business.openingHours,
       latitude: business.latitude,
       longitude: business.longitude,
       google_maps_url: business.googleMapsUrl,
       site_health: healthResult.health,
       site_health_notes: healthResult.notes.join(" "),
+      priority_score: priority.score,
+      priority_label: priority.label,
     })
     .select()
     .single();
