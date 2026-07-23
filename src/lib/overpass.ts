@@ -68,7 +68,7 @@ export async function searchBusinesses(
       node${tagFilter}(area.searchArea);
       way${tagFilter}(area.searchArea);
     );
-    out center tags;
+    out center tags 80;
   `;
 
   let response: Response | null = null;

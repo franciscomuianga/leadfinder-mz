@@ -1,5 +1,9 @@
 "use server";
 
+// Pesquisas em cidades grandes podem demorar mais que o limite padrão da
+// Vercel (10s) — a Overpass API para cidades como Maputo pode levar 15-30s.
+export const maxDuration = 60;
+
 import { requireOrganization } from "@/lib/auth";
 import { searchBusinesses, googleMapsUrl, type OsmBusiness } from "@/lib/overpass";
 import { checkSiteHealth } from "@/lib/site-health-check";
