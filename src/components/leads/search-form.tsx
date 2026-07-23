@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { searchLeadsAction, saveLeadAction, type SearchResultItem } from "./actions";
+import { searchLeadsAction, saveLeadAction, type SearchResultItem } from "@/app/leads/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
