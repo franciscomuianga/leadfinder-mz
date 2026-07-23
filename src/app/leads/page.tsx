@@ -1,6 +1,10 @@
 import { requireOrganization } from "@/lib/auth";
 import { SearchForm } from "@/components/leads/search-form";
 
+// Pesquisas em cidades grandes podem demorar mais que o limite padrão da
+// Vercel (10s) — a Overpass API para cidades como Maputo pode levar 15-30s.
+export const maxDuration = 60;
+
 export default async function LeadsPage() {
   await requireOrganization();
 
