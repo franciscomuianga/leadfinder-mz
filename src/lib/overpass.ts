@@ -7,7 +7,10 @@
  * mantida a atribuição "© OpenStreetMap contributors" na interface.
  */
 
-const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+];
 
 // Mapeia as categorias em português (usadas na UI) para tags OSM reais.
 export const CATEGORY_TAGS: Record<string, string> = {
@@ -68,14 +71,32 @@ export async function searchBusinesses(
     out center tags;
   `;
 
-  const response = await fetch(OVERPASS_ENDPOINT, {
-    method: "POST",
-    body: query,
-    headers: { "Content-Type": "text/plain" },
-  });
+  let response: Response | null = null;
+  let lastError = "";
 
-  if (!response.ok) {
-    throw new Error(`Overpass API falhou: ${response.status}`);
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      const attempt = await fetch(endpoint, {
+        method: "POST",
+        body: query,
+        headers: {
+          "Content-Type": "text/plain",
+          "User-Agent": "LeadFinderMZ/1.0 (ferramenta interna de prospecao)",
+          Accept: "*/*",
+        },
+      });
+      if (attempt.ok) {
+        response = attempt;
+        break;
+      }
+      lastError = `${endpoint} respondeu ${attempt.status}`;
+    } catch (err) {
+      lastError = `${endpoint} falhou: ${err instanceof Error ? err.message : "erro de rede"}`;
+    }
+  }
+
+  if (!response) {
+    throw new Error(`Todos os servidores Overpass falharam. Último erro: ${lastError}`);
   }
 
   const data: { elements: OverpassElement[] } = await response.json();
@@ -110,7 +131,7 @@ async function resolveAreaId(areaName: string): Promise<number> {
   )}&format=json&limit=1&countrycodes=mz`;
 
   const response = await fetch(url, {
-    headers: { "User-Agent": "LeadFinderMZ/1.0" }, // exigido pela política do Nominatim
+    headers: { "User-Agent": "LeadFinderMZ/1.0" },
   });
 
   if (!response.ok) throw new Error("Não foi possível localizar essa área.");
@@ -118,7 +139,6 @@ async function resolveAreaId(areaName: string): Promise<number> {
   const results: { osm_id: number; osm_type: string }[] = await response.json();
   if (results.length === 0) throw new Error(`Área "${areaName}" não encontrada.`);
 
-  // Overpass usa um offset: 3600000000 para relations, 2400000000 para ways
   const offset = results[0].osm_type === "relation" ? 3600000000 : 2400000000;
   return results[0].osm_id + offset;
 }
