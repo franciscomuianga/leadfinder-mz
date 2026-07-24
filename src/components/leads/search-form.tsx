@@ -3,39 +3,10 @@
 import { useState, useTransition } from "react";
 import { searchLeadsAction, saveLeadAction, type SearchResultItem } from "@/app/leads/actions";
 import { calculatePriority } from "@/lib/priority-score";
+import { CATEGORIES, CIDADES_MOCAMBIQUE } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const CATEGORIES = [
-  { value: "restaurante", label: "Restaurantes" },
-  { value: "cafe", label: "Cafés" },
-  { value: "loja", label: "Lojas" },
-  { value: "escritorio", label: "Escritórios" },
-  { value: "farmacia", label: "Farmácias" },
-  { value: "hotel", label: "Hotéis" },
-  { value: "salao_beleza", label: "Salões de beleza" },
-  { value: "oficina_auto", label: "Oficinas auto" },
-  { value: "mercearia", label: "Mercearias" },
-];
-
-const CIDADES_MOCAMBIQUE = [
-  "Maputo",
-  "Matola",
-  "Beira",
-  "Nampula",
-  "Chimoio",
-  "Nacala",
-  "Quelimane",
-  "Tete",
-  "Xai-Xai",
-  "Inhambane",
-  "Pemba",
-  "Lichinga",
-  "Cuamba",
-  "Dondo",
-  "Maxixe",
-];
 
 export function SearchForm() {
   const [category, setCategory] = useState("restaurante");

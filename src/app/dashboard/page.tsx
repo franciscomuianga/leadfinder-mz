@@ -48,9 +48,15 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <h2 className="mt-8 mb-3 text-lg font-semibold text-white">
-        Leads recentes
-      </h2>
+      <div className="mt-8 mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold text-white">Leads recentes</h2>
+        <Link
+          href="/leads/new"
+          className="rounded-lg border border-brand-border px-3 py-1.5 text-xs font-medium text-neutral-300 hover:border-brand-primary hover:text-white"
+        >
+          + Adicionar manualmente
+        </Link>
+      </div>
 
       {total === 0 ? (
         <Card>
