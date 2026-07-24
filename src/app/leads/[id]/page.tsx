@@ -2,6 +2,7 @@ import { requireOrganization } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LeadStatusPanel } from "@/components/leads/lead-status-panel";
+import { LeadContactPanel } from "@/components/leads/lead-contact-panel";
 import { SitePreview } from "@/components/preview/site-preview";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -76,6 +77,26 @@ export default async function LeadDetailPage({
                 <dd className="text-neutral-200">{lead.opening_hours ?? "—"}</dd>
               </div>
               <div>
+                <dt className="text-xs text-neutral-500">Email</dt>
+                <dd className="text-neutral-200">{lead.email ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-neutral-500">WhatsApp (registado)</dt>
+                <dd className="text-neutral-200">{lead.whatsapp ?? "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-neutral-500">Rede social</dt>
+                <dd className="text-neutral-200">
+                  {lead.social_media ? (
+                    <a href={lead.social_media} target="_blank" rel="noopener noreferrer" className="text-brand-primary-light hover:underline">
+                      Ver perfil
+                    </a>
+                  ) : (
+                    "—"
+                  )}
+                </dd>
+              </div>
+              <div>
                 <dt className="text-xs text-neutral-500">Site existente</dt>
                 <dd className="text-neutral-200">
                   {lead.existing_website ? (
@@ -97,6 +118,7 @@ export default async function LeadDetailPage({
           </Card>
 
           <LeadStatusPanel leadId={lead.id} initialStatus={lead.status} initialNotes={lead.notes} />
+          <LeadContactPanel leadId={lead.id} phone={lead.phone} initialServices={lead.services_offered ?? []} />
         </div>
 
         <div className="lg:col-span-2">
@@ -109,6 +131,7 @@ export default async function LeadDetailPage({
             address={lead.address}
             city={lead.city}
             phone={lead.phone}
+            openingHours={lead.opening_hours}
           />
         </div>
       </div>

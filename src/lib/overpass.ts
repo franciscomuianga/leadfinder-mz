@@ -35,6 +35,9 @@ export interface OsmBusiness {
   phone: string | null;
   website: string | null;
   openingHours: string | null;
+  email: string | null;
+  whatsapp: string | null;
+  socialMedia: string | null;
   latitude: number;
   longitude: number;
 }
@@ -121,6 +124,9 @@ export async function searchBusinesses(
         phone: tags.phone ?? tags["contact:phone"] ?? null,
         website: tags.website ?? tags["contact:website"] ?? null,
         openingHours: tags.opening_hours ?? null,
+        email: tags.email ?? tags["contact:email"] ?? null,
+        whatsapp: tags["contact:whatsapp"] ?? null,
+        socialMedia: tags["contact:facebook"] ?? tags["contact:instagram"] ?? null,
         latitude: lat,
         longitude: lon,
       };
