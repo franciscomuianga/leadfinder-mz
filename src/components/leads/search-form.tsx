@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { searchLeadsAction, saveLeadAction, type SearchResultItem } from "@/app/leads/actions";
 import { calculatePriority } from "@/lib/priority-score";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -18,6 +17,24 @@ const CATEGORIES = [
   { value: "salao_beleza", label: "Salões de beleza" },
   { value: "oficina_auto", label: "Oficinas auto" },
   { value: "mercearia", label: "Mercearias" },
+];
+
+const CIDADES_MOCAMBIQUE = [
+  "Maputo",
+  "Matola",
+  "Beira",
+  "Nampula",
+  "Chimoio",
+  "Nacala",
+  "Quelimane",
+  "Tete",
+  "Xai-Xai",
+  "Inhambane",
+  "Pemba",
+  "Lichinga",
+  "Cuamba",
+  "Dondo",
+  "Maxixe",
 ];
 
 export function SearchForm() {
@@ -83,7 +100,17 @@ export function SearchForm() {
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-neutral-400">Cidade / zona</label>
-          <Input value={area} onChange={(e) => setArea(e.target.value)} className="w-48" />
+          <select
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            className="rounded-lg border border-brand-border bg-brand-bg px-3.5 py-2.5 text-sm text-neutral-100 focus:border-brand-primary focus:outline-none"
+          >
+            {CIDADES_MOCAMBIQUE.map((cidade) => (
+              <option key={cidade} value={cidade}>
+                {cidade}
+              </option>
+            ))}
+          </select>
         </div>
         <Button type="submit" disabled={isPending}>
           {isPending ? "A pesquisar..." : "Pesquisar"}

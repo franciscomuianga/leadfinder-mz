@@ -51,9 +51,16 @@ interface OverpassElement {
   tags?: Record<string, string>;
 }
 
+type BBox = [south: number, west: number, north: number, east: number];
+
 /**
  * Pesquisa negócios de uma categoria dentro de uma área (definida por
- * um nome de cidade/bairro, resolvido via Nominatim — também gratuito).
+ * um nome de cidade, resolvido via Nominatim — também gratuito).
+ *
+ * Usa uma caixa delimitadora (bounding box) em vez do polígono completo
+ * da cidade: é uma pesquisa muito mais rápida no servidor Overpass —
+ * o cálculo do polígono exato de cidades grandes (ex: Maputo, Matola)
+ * era a causa dos timeouts (504) que estávamos a ter.
  */
 export async function searchBusinesses(
   categoryKey: string,
@@ -62,16 +69,16 @@ export async function searchBusinesses(
   const tag = CATEGORY_TAGS[categoryKey];
   if (!tag) throw new Error(`Categoria desconhecida: ${categoryKey}`);
 
-  const areaId = await resolveAreaId(areaName);
+  const bbox = await resolveBoundingBox(areaName);
   const [key, value] = tag.split("=");
   const tagFilter = value ? `["${key}"="${value}"]` : `["${key}"]`;
+  const bboxStr = bbox.join(",");
 
   const query = `
-    [out:json][timeout:25];
-    area(${areaId})->.searchArea;
+    [out:json][timeout:20];
     (
-      node${tagFilter}(area.searchArea);
-      way${tagFilter}(area.searchArea);
+      node${tagFilter}(${bboxStr});
+      way${tagFilter}(${bboxStr});
     );
     out center tags 80;
   `;
@@ -89,6 +96,7 @@ export async function searchBusinesses(
           "User-Agent": "LeadFinderMZ/1.0 (ferramenta interna de prospecao)",
           Accept: "*/*",
         },
+        signal: AbortSignal.timeout(25000),
       });
       if (attempt.ok) {
         response = attempt;
@@ -133,24 +141,24 @@ export async function searchBusinesses(
     });
 }
 
-/** Resolve o nome de uma área (ex: "Maputo") para o ID interno do OSM. */
-async function resolveAreaId(areaName: string): Promise<number> {
+/** Resolve o nome de uma área (ex: "Maputo") para uma caixa delimitadora [sul,oeste,norte,este]. */
+async function resolveBoundingBox(areaName: string): Promise<BBox> {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
     areaName + ", Moçambique"
   )}&format=json&limit=1&countrycodes=mz`;
 
   const response = await fetch(url, {
     headers: { "User-Agent": "LeadFinderMZ/1.0" }, // exigido pela política do Nominatim
+    signal: AbortSignal.timeout(10000),
   });
 
   if (!response.ok) throw new Error("Não foi possível localizar essa área.");
 
-  const results: { osm_id: number; osm_type: string }[] = await response.json();
+  const results: { boundingbox: [string, string, string, string] }[] = await response.json();
   if (results.length === 0) throw new Error(`Área "${areaName}" não encontrada.`);
 
-  // Overpass usa um offset: 3600000000 para relations, 2400000000 para ways
-  const offset = results[0].osm_type === "relation" ? 3600000000 : 2400000000;
-  return results[0].osm_id + offset;
+  const [south, north, west, east] = results[0].boundingbox.map(Number);
+  return [south, west, north, east];
 }
 
 /** Gera um link direto do Google Maps a partir de coordenadas/nome — sem API, sem custo. */
